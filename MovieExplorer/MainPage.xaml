@@ -1,0 +1,37 @@
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MovieExplorer.MainPage">
+
+    <Grid Padding="20" RowDefinitions="Auto,Auto,*" RowSpacing="10">
+
+        <Button Grid.Row="0"
+                Text="Download JSON"
+                Clicked="DownloadJson_Clicked"/>
+
+        <Label Grid.Row="1"
+               x:Name="StatusLabel"
+               Text="Press the button to download the JSON file." />
+
+        <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding Movies}"
+                        SelectionMode="Single"
+                        SelectedItem="{Binding SelectedMovie}"
+                        SelectionChanged="CollectionView_SelectionChanged">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <VerticalStackLayout Padding="10" Spacing="2">
+                        <Label Text="{Binding Emoji}" FontSize="Large"/>
+                        <Label Text="{Binding Title}" FontSize="Medium" FontAttributes="Bold"/>
+                        <Label Text="{Binding Year}" FontSize="Small"/>
+                        <Label Text="{Binding GenreText}" FontSize="Small"/>
+                        <Label Text="{Binding Director}" FontSize="Small"/>
+                        <Label Text="{Binding Rating}" FontSize="Small"/>
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+
+    </Grid>
+</ContentPage>
