@@ -6,6 +6,7 @@ namespace MovieExplorer
     {
         // The ViewModel for data binding
         private readonly MovieViewModel _viewModel = new MovieViewModel();
+        private bool _loadedOnce;
         public MainPage()
         {
             InitializeComponent();
@@ -13,27 +14,37 @@ namespace MovieExplorer
             BindingContext = _viewModel;
         }
 
-        //Temp Code
-        private async void DownloadJson_Clicked(object sender, EventArgs e)
+        protected override async void OnAppearing()
         {
+
+            base.OnAppearing();
+
+            if (_loadedOnce) return;
+            _loadedOnce = true;
+
             try
             {
-                StatusLabel.Text = "Downloading...";
+                // Ensures JSON exists locally (downloads only on first run)
+                await JsonDownloadService.GetJsonFilePathAsync();
 
-                var savedPath = await JsonDownloadService.DownloadJsonAsync();
-
-                StatusLabel.Text = "Download complete. Loading movies...";
-
+                // Loads movies from the local file into the ObservableCollection
                 await _viewModel.LoadMoviesAsync();
-
-                StatusLabel.Text = $"Loaded {_viewModel.Movies.Count} movies.\nSaved to:\n{savedPath}";
             }
             catch (Exception ex)
             {
-                StatusLabel.Text = $"Error:\n{ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Startup load failed: {ex}");
+                await DisplayAlert("Loading failed", ex.Message, "OK");
             }
         }
-        //End Temp Code
+
+        private void Favourite_Clicked(object sender, EventArgs e)
+        {
+            if (sender is Button btn && btn.BindingContext is Movie movie)
+            {
+                _viewModel.ToggleFavourite(movie);
+            }
+        }
+
         private void CollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 

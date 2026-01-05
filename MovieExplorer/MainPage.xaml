@@ -2,17 +2,29 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MovieExplorer.MainPage">
 
-    <Grid Padding="20" RowDefinitions="Auto,Auto,*" RowSpacing="10">
+    <Grid Padding="20" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10">
 
-        <Button Grid.Row="0"
-                Text="Download JSON"
-                Clicked="DownloadJson_Clicked"/>
+        <!--Row 0: Toggle for favourites only-->
+        <HorizontalStackLayout  Grid.Row="0" Spacing="10">
+            <Label Text="Favourites only" VerticalOptions="Center"/>
+            <Switch IsToggled="{Binding ShowFavouritesOnly}"/>
+        </HorizontalStackLayout>
 
-        <Label Grid.Row="1"
-               x:Name="StatusLabel"
-               Text="Press the button to download the JSON file." />
-
-        <CollectionView Grid.Row="2"
+        <!--Row 1: Search Bar for title-->
+        <Entry Grid.Row="1"
+            Placeholder="Search by title..."
+            Text="{Binding titleFilter}"
+              
+            />
+        
+        <!--Row 2: Filter by genre-->
+        <Picker Grid.Row="2"
+            Title="Select Genre"
+            ItemsSource="{Binding Genres}"
+            SelectedItem="{Binding SelectedGenre}"/>
+        
+        <!--Row 3: Movie List-->
+        <CollectionView Grid.Row="3"
                         ItemsSource="{Binding Movies}"
                         SelectionMode="Single"
                         SelectedItem="{Binding SelectedMovie}"
@@ -20,14 +32,66 @@
 
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <VerticalStackLayout Padding="10" Spacing="2">
-                        <Label Text="{Binding Emoji}" FontSize="Large"/>
-                        <Label Text="{Binding Title}" FontSize="Medium" FontAttributes="Bold"/>
-                        <Label Text="{Binding Year}" FontSize="Small"/>
-                        <Label Text="{Binding GenreText}" FontSize="Small"/>
-                        <Label Text="{Binding Director}" FontSize="Small"/>
-                        <Label Text="{Binding Rating}" FontSize="Small"/>
-                    </VerticalStackLayout>
+                    <Grid Padding="10"
+                          ColumnDefinitions="Auto,*,Auto"
+                          RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                          RowSpacing="2">
+
+                        <!-- Emoji -->
+                        <Label Grid.Row="0" Grid.Column="0"
+                               Text="{Binding Emoji}"
+                               FontSize="Large"
+                               VerticalOptions="Center" />
+
+                        <!-- Title -->
+                        <Label Grid.Row="0" Grid.Column="1"
+                               Text="{Binding Title}"
+                               FontSize="Medium"
+                               FontAttributes="Bold"
+                               VerticalOptions="Center" />
+
+                        <!-- Favourite button -->
+                        <Button Grid.Row="0" Grid.Column="2"
+                                Clicked="Favourite_Clicked"
+                                Padding="0"
+                                WidthRequest="44"
+                                HeightRequest="44"
+                                BackgroundColor="White"
+                                FontSize="22">
+
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button"
+                                             Binding="{Binding IsFavourite}"
+                                             Value="True">
+                                    <Setter Property="Text" Value="★" />
+                                </DataTrigger>
+
+                                <DataTrigger TargetType="Button"
+                                             Binding="{Binding IsFavourite}"
+                                             Value="False">
+                                    <Setter Property="Text" Value="☆" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+
+                        <!-- Details -->
+                        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                               Text="{Binding Year}"
+                               FontSize="Small" />
+
+                        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                               Text="{Binding GenreText}"
+                               FontSize="Small" />
+
+                        <Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                               Text="{Binding Director}"
+                               FontSize="Small" />
+
+                        <Label Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
+                               Text="{Binding Rating}"
+                               FontSize="Small" />
+
+                    </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
 

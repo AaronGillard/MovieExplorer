@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Maui.Storage;
 
 namespace MovieExplorer.Services
 {
@@ -11,24 +10,18 @@ namespace MovieExplorer.Services
 
         private const string FileName = "moviesemoji.json";
 
-        public static async Task<string> DownloadJsonAsync()
+        public static async Task<string> GetJsonFilePathAsync()
         {
-            // Where the file will be saved
             var filePath = Path.Combine(FileSystem.AppDataDirectory, FileName);
 
-            //Reuse existing file if it exists
             if (File.Exists(filePath))
-            {
                 return filePath;
-            }
-            // Download the JSON
+
             using var httpClient = new HttpClient();
-            var jsonContent = await httpClient.GetStringAsync(JsonUrl);
+            var json = await httpClient.GetStringAsync(JsonUrl);
+            await File.WriteAllTextAsync(filePath, json);
 
-            // Save locally
-            await File.WriteAllTextAsync(filePath, jsonContent);
-
-            return filePath; //Returns path so it can be shown for testing purposes
+            return filePath;
         }
     }
 }
