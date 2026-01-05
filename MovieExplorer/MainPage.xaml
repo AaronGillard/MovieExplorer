@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MovieExplorer.MainPage">
 
-    <Grid Padding="20" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10">
+    <Grid Padding="20" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="10">
 
         <!--Row 0: Toggle for favourites only-->
         <HorizontalStackLayout  Grid.Row="0" Spacing="10">
@@ -14,15 +14,14 @@
         <Entry Grid.Row="1"
             Placeholder="Search by title..."
             Text="{Binding titleFilter}"
-              
             />
-        
+
         <!--Row 2: Filter by genre-->
         <Picker Grid.Row="2"
             Title="Select Genre"
             ItemsSource="{Binding Genres}"
             SelectedItem="{Binding SelectedGenre}"/>
-        
+
         <!--Row 3: Movie List-->
         <CollectionView Grid.Row="3"
                         ItemsSource="{Binding Movies}"
@@ -34,7 +33,7 @@
                 <DataTemplate>
                     <Grid Padding="10"
                           ColumnDefinitions="Auto,*,Auto"
-                          RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                          RowDefinitions="Auto,Auto,Auto,Auto,Auto, Auto"
                           RowSpacing="2">
 
                         <!-- Emoji -->
@@ -90,6 +89,13 @@
                         <Label Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
                                Text="{Binding Rating}"
                                FontSize="Small" />
+
+                        <!--Favourited On-->
+                        <Label Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3"
+                               Text="{Binding FavouritedOn, StringFormat='Favourited on {0:g}'}"
+                               FontSize="Small"
+                               TextColor="Gray"
+                               IsVisible="{Binding IsFavourite}" />
 
                     </Grid>
                 </DataTemplate>

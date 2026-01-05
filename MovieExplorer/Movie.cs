@@ -30,7 +30,6 @@ namespace MovieExplorer
            : string.Empty;
 
         //backing field for IsFavourite property
-
         private bool _IsFavourite;
         public bool IsFavourite
         {
@@ -44,6 +43,8 @@ namespace MovieExplorer
                 }
             }
         }
+        //Property that stores the date and time when the movie was marked as a favourite
+        public DateTime? FavouritedOn { get; set; }
         //Creates Unique ID for each movie to be stored in Preferences
         public string FavouriteKey => $"{Title}|{Year}";
         //helper method for raising the PropertyChanged event

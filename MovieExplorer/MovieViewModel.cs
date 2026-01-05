@@ -114,48 +114,91 @@ namespace MovieExplorer
 
         private const string FavouritePrefix = "favourite_movie_keys";
 
-        private HashSet<string> LoadFavouriteKeys()
-        {
-          var json = Preferences.Get(FavouritePrefix, "[]");
-            var keys = JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
-            return keys.ToHashSet();
-        }
-        //Save the favourite movie keys to Preferences
-        private void SaveFavouriteKeys(HashSet<string> keys)
-        {
-            var json = JsonSerializer.Serialize(keys.ToList());
-            Preferences.Set(FavouritePrefix, json);
-        }
 
         //Called to update the favourite status of a movie
         private void ApplyFavouriteStatus()
         {
-            var favKeys = LoadFavouriteKeys();
+            var favourites = LoadFavouriteData();
 
-            foreach (var movie in Movies)
+            foreach (var movie in _allMovies)
             {
-                 movie.IsFavourite = favKeys.Contains(movie.FavouriteKey);
+                if (favourites.TryGetValue(movie.FavouriteKey, out var favouritedDate))
+                {
+                    movie.IsFavourite = true;
+                    movie.FavouritedOn = favouritedDate;
+                }
+                else
+                {
+                    movie.IsFavourite = false;
+                    movie.FavouritedOn = null;
+                }
             }
         }
         //Toggle the favourite status of a movie
         public void ToggleFavourite(Movie movie)
         {
-            if (movie == null) return;
-            var favKeys = LoadFavouriteKeys();
+            if(movie == null) return;
+
+            var favourites = LoadFavouriteData();
+
             if (movie.IsFavourite)
             {
-                favKeys.Remove(movie.FavouriteKey);
+                //Unfavourite
+                favourites.Remove(movie.FavouriteKey);
                 movie.IsFavourite = false;
+                movie.FavouritedOn = null;
             }
             else
             {
-                favKeys.Add(movie.FavouriteKey);
+                //Favourite
+                var now = DateTime.Now;
+                favourites[movie.FavouriteKey] = now;
                 movie.IsFavourite = true;
+                movie.FavouritedOn = now;
             }
-            SaveFavouriteKeys(favKeys);
+
+            SaveFavouriteData(favourites);
+            //Re-apply filter to update UI
             ApplyFilter();
         }
 
+        //Load favourite data with timestamps
+        private Dictionary<string, DateTime> LoadFavouriteData()
+        {
+            var json = Preferences.Get(FavouritePrefix, "{}");
+
+            // If old format exists (["key1","key2"]), migrate it
+            if (!string.IsNullOrWhiteSpace(json) && json.TrimStart().StartsWith("["))
+            {
+                var oldKeys = JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
+
+                var migrated = oldKeys
+                    .Distinct()
+                    .ToDictionary(k => k, _ => DateTime.Now);
+
+                SaveFavouriteData(migrated);
+                return migrated;
+            }
+
+            // New format ({"key":"2026-01-05T21:15:00"})
+            try
+            {
+                return JsonSerializer.Deserialize<Dictionary<string, DateTime>>(json)
+                       ?? new Dictionary<string, DateTime>();
+            }
+            catch
+            {
+                // If preferences got corrupted, don't crash the app
+                return new Dictionary<string, DateTime>();
+            }
+        }
+
+        //Save favourite data with timestamps
+        private void SaveFavouriteData(Dictionary<string, DateTime> data)
+        {
+            var json = JsonSerializer.Serialize(data);
+            Preferences.Set(FavouritePrefix, json);
+        }
         private void ApplyFilter()
         {
             IEnumerable<Movie> query = _allMovies;
@@ -191,7 +234,7 @@ namespace MovieExplorer
             Genres.Add("All");
 
             var allGenres = _allMovies
-                .SelectMany(m => m.Genre)
+                .SelectMany(m => m.Genre ?? new List<string>())
                 .Distinct()
                 .OrderBy(g => g);
 
