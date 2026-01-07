@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MovieExplorer.MainPage">
 
-    <Grid Padding="20" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="10">
+    <Grid Padding="20" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10">
 
         <!--Row 0: Toggle for favourites only-->
         <HorizontalStackLayout  Grid.Row="0" Spacing="10">

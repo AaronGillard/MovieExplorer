@@ -2,6 +2,7 @@
 
 namespace MovieExplorer
 {
+    //PRE PROFILES BUILD FOR SECURITY
     public partial class MainPage : ContentPage
     {
         // The ViewModel for data binding
