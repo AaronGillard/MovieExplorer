@@ -1,6 +1,12 @@
 ﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MovieExplorer.MainPage">
+             x:Class="MovieExplorer.MainPage"
+             Title="Movie Explorer App"
+              BackgroundColor="{AppThemeBinding Light=White, Dark=#121212}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Theme" Clicked="Theme_Clicked"/>
+    </ContentPage.ToolbarItems>
 
     <Grid Padding="20" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10">
 
@@ -39,12 +45,14 @@
                         <!-- Emoji -->
                         <Label Grid.Row="0" Grid.Column="0"
                                Text="{Binding Emoji}"
+                               TextColor="{AppThemeBinding Light=#111827, Dark=#F9FAFB}"
                                FontSize="Large"
                                VerticalOptions="Center" />
 
                         <!-- Title -->
                         <Label Grid.Row="0" Grid.Column="1"
                                Text="{Binding Title}"
+                               TextColor="{AppThemeBinding Light=#111827, Dark=#F9FAFB}"
                                FontSize="Medium"
                                FontAttributes="Bold"
                                VerticalOptions="Center" />
@@ -55,7 +63,9 @@
                                 Padding="0"
                                 WidthRequest="44"
                                 HeightRequest="44"
-                                BackgroundColor="White"
+                                BackgroundColor="{AppThemeBinding Light=#F3F4F6, Dark=#1E1E1E}"
+                                TextColor="{AppThemeBinding Light=#111827, Dark=#F9FAFB}"
+                                CornerRadius="22"
                                 FontSize="22">
 
                             <Button.Triggers>
@@ -80,21 +90,24 @@
 
                         <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
                                Text="{Binding GenreText}"
+                               TextColor="{AppThemeBinding Light=#111827, Dark=#F9FAFB}"
                                FontSize="Small" />
 
                         <Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
                                Text="{Binding Director}"
+                               TextColor="{AppThemeBinding Light=#111827, Dark=#F9FAFB}"
                                FontSize="Small" />
 
                         <Label Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
                                Text="{Binding Rating}"
+                               TextColor="{AppThemeBinding Light=#111827, Dark=#F9FAFB}"
                                FontSize="Small" />
 
                         <!--Favourited On-->
                         <Label Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3"
                                Text="{Binding FavouritedOn, StringFormat='Favourited on {0:g}'}"
                                FontSize="Small"
-                               TextColor="Gray"
+                               TextColor="{AppThemeBinding Light=#6B7280, Dark=#9CA3AF}"
                                IsVisible="{Binding IsFavourite}" />
 
                     </Grid>
