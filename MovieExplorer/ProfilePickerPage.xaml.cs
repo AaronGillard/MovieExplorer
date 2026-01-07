@@ -61,4 +61,9 @@ public partial class ProfilePickerPage : ContentPage
         // Remove picker so Back doesn't return to it
         Navigation.RemovePage(pickerPage);
     }
+
+    private void Theme_Clicked(object sender, EventArgs e)
+    {
+        ThemeService.ToggleLightDark(Application.Current);
+    }
 }

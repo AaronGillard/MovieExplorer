@@ -44,6 +44,11 @@ namespace MovieExplorer
                 await _viewModel.ToggleFavouriteStatusAsync(movie);
         }
 
+        private void Theme_Clicked(object sender, EventArgs e)
+        {
+            ThemeService.ToggleLightDark(Application.Current);
+        }
+
         private void CollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 

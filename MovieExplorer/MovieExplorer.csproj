@@ -70,4 +70,12 @@
 	  </MauiXaml>
 	</ItemGroup>
 
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-android'">
+		<!-- Ensure the APK includes 32-bit ARM for devices like yours -->
+		<RuntimeIdentifiers>android-arm;android-arm64</RuntimeIdentifiers>
+
+		<!-- Optional: explicit ABI list (must NOT include obsolete 'armeabi') -->
+		<AndroidSupportedAbis>armeabi-v7a;arm64-v8a</AndroidSupportedAbis>
+	</PropertyGroup>
+	
 </Project>
