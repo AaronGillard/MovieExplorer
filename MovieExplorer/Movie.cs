@@ -43,10 +43,22 @@ namespace MovieExplorer
                 }
             }
         }
-        //Property that stores the date and time when the movie was marked as a favourite
-        public DateTime? FavouritedOn { get; set; }
-        //Creates Unique ID for each movie to be stored in Preferences
-        public string FavouriteKey => $"{Title}|{Year}";
+        private DateTime? _favouritedOn;
+        public DateTime? FavouritedOn
+        {
+            get => _favouritedOn;
+            set
+            {
+                if (_favouritedOn != value)
+                {
+                    _favouritedOn = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        // Creates a stable key (normalized) used for storage
+        public string FavouriteKey => $"{(Title ?? "").Trim().ToLowerInvariant()}|{Year}";
         //helper method for raising the PropertyChanged event
         private void OnPropertyChanged([CallerMemberName] string? name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

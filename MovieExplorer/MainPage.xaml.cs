@@ -38,12 +38,10 @@ namespace MovieExplorer
             }
         }
 
-        private void Favourite_Clicked(object sender, EventArgs e)
+        private async void Favourite_Clicked(object sender, EventArgs e)
         {
             if (sender is Button btn && btn.BindingContext is Movie movie)
-            {
-                _viewModel.ToggleFavourite(movie);
-            }
+                await _viewModel.ToggleFavouriteStatusAsync(movie);
         }
 
         private void CollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)

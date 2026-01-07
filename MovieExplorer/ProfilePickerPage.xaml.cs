@@ -60,27 +60,5 @@ public partial class ProfilePickerPage : ContentPage
 
         // Remove picker so Back doesn't return to it
         Navigation.RemovePage(pickerPage);
-
-        /* Old code for reference
-         
-        if (e.CurrentSelection.FirstOrDefault() is not Profile p)
-            return;
-
-        _profiles.SetCurrentProfileId(p.Id);
-
-        //Clear selection
-        if (sender is CollectionView cv)
-            cv.SelectedItem = null;
-
-        //Temporary alert to show profile selection
-        //DisplayAlert("Profile Selected", $"Current profile set to: {p.Name}", "OK");
-
-        if(this.Window is not null)
-            this.Window.Page = new AppShell();
-        else
-            Application.Current!.Windows[0].Page = new AppShell();
-        //Enter the main App
-        //Application.Current!.MainPage = new AppShell();
-        */
     }
 }

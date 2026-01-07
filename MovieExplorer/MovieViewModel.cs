@@ -9,12 +9,18 @@ using System.Runtime.CompilerServices;
 using Microsoft.Maui.Storage;
 using System.Text.Json;
 using System.Reflection.Metadata;
+using MovieExplorer.Services;
 
 namespace MovieExplorer
 {
     public class MovieViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
+        private readonly ProfileService _profileService = new();
+        private readonly FavouriteService _favouriteService = new();
+
+        private string? _currentProfileId;
+        private Dictionary<string, DateTime> _favouritesByKey = new();
 
         public MovieViewModel()
         {
@@ -106,99 +112,40 @@ namespace MovieExplorer
 
             BuildGenreList();
 
-            //Apply favourite status from Preferences
-            ApplyFavouriteStatus();
-            //Updates UI with current filter
+            await EnsureFavouritesLoadedAsync(forceReload: true);
             ApplyFilter();
         }
 
-        private const string FavouritePrefix = "favourite_movie_keys";
-
-
-        //Called to update the favourite status of a movie
-        private void ApplyFavouriteStatus()
-        {
-            var favourites = LoadFavouriteData();
-
-            foreach (var movie in _allMovies)
-            {
-                if (favourites.TryGetValue(movie.FavouriteKey, out var favouritedDate))
-                {
-                    movie.IsFavourite = true;
-                    movie.FavouritedOn = favouritedDate;
-                }
-                else
-                {
-                    movie.IsFavourite = false;
-                    movie.FavouritedOn = null;
-                }
-            }
-        }
+        
         //Toggle the favourite status of a movie
-        public void ToggleFavourite(Movie movie)
+        public async Task ToggleFavourite(Movie movie)
         {
-            if(movie == null) return;
+            if (movie == null) return;
 
-            var favourites = LoadFavouriteData();
+            // Always ensure the favourites dictionary matches the currently selected profile
+            await EnsureFavouritesLoadedAsync();
+
+            var key = movie.FavouriteKey;
 
             if (movie.IsFavourite)
             {
-                //Unfavourite
-                favourites.Remove(movie.FavouriteKey);
+                _favouritesByKey.Remove(key);
                 movie.IsFavourite = false;
                 movie.FavouritedOn = null;
             }
             else
             {
-                //Favourite
-                var now = DateTime.Now;
-                favourites[movie.FavouriteKey] = now;
+                var nowUtc = DateTime.UtcNow;
+                _favouritesByKey[key] = nowUtc;
+
                 movie.IsFavourite = true;
-                movie.FavouritedOn = now;
+                movie.FavouritedOn = nowUtc.ToLocalTime();
             }
 
-            SaveFavouriteData(favourites);
-            //Re-apply filter to update UI
+            await _favouriteService.SaveAsync(_currentProfileId!, _favouritesByKey);
             ApplyFilter();
         }
 
-        //Load favourite data with timestamps
-        private Dictionary<string, DateTime> LoadFavouriteData()
-        {
-            var json = Preferences.Get(FavouritePrefix, "{}");
-
-            // If old format exists (["key1","key2"]), migrate it
-            if (!string.IsNullOrWhiteSpace(json) && json.TrimStart().StartsWith("["))
-            {
-                var oldKeys = JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
-
-                var migrated = oldKeys
-                    .Distinct()
-                    .ToDictionary(k => k, _ => DateTime.Now);
-
-                SaveFavouriteData(migrated);
-                return migrated;
-            }
-
-            // New format ({"key":"2026-01-05T21:15:00"})
-            try
-            {
-                return JsonSerializer.Deserialize<Dictionary<string, DateTime>>(json)
-                       ?? new Dictionary<string, DateTime>();
-            }
-            catch
-            {
-                // If preferences got corrupted, don't crash the app
-                return new Dictionary<string, DateTime>();
-            }
-        }
-
-        //Save favourite data with timestamps
-        private void SaveFavouriteData(Dictionary<string, DateTime> data)
-        {
-            var json = JsonSerializer.Serialize(data);
-            Preferences.Set(FavouritePrefix, json);
-        }
         private void ApplyFilter()
         {
             IEnumerable<Movie> query = _allMovies;
@@ -245,7 +192,44 @@ namespace MovieExplorer
             if(SelectedGenre == null)
                 SelectedGenre = "All";
         }
+        //Ensure favourites are loaded for the current profile
+        private async Task EnsureFavouritesLoadedAsync(bool forceReload = false)
+        {
+            var profile = await _profileService.EnsureCurrentProfileAsync();
+            var activeProfileId = profile.Id;
 
+            // Reload if forced OR if the profile changed
+            if (forceReload || !string.Equals(_currentProfileId, activeProfileId, StringComparison.Ordinal))
+            {
+                _currentProfileId = activeProfileId;
+                _favouritesByKey = await _favouriteService.LoadAsync(_currentProfileId);
+
+                // Apply to movies, including clearing IsFavourite/FavouritedOn when not favourited
+                ApplyFavouriteStatusFromLoadedFavourites();
+            }
+        }
+
+        private void ApplyFavouriteStatusFromLoadedFavourites()
+        {
+            foreach (var movie in _allMovies)
+            {
+                if (_favouritesByKey.TryGetValue(movie.FavouriteKey, out var whenUtc))
+                {
+                    movie.IsFavourite = true;
+                    movie.FavouritedOn = whenUtc.ToLocalTime();
+                }
+                else
+                {
+                    //Stops favourites from persisting after profile change
+                    movie.IsFavourite = false;
+                    movie.FavouritedOn = null;
+                }
+            }
+        }
+
+        //Wrapper to allow forcing reload of favourites
+        public Task ToggleFavouriteStatusAsync(Movie movie) => ToggleFavourite(movie);
+       
         // Tells the UI “a property changed”
         private void OnPropertyChanged([CallerMemberName] string? name = null)
         {
